@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.StringTokenizer;
 import org.checkerframework.checker.interning.qual.Interned;
-import org.checkerframework.checker.mustcall.qual.MustCallUnknown;
 import org.checkerframework.checker.mustcall.qual.PolyMustCall;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -545,8 +544,7 @@ public final class ReflectionPlume {
    *     null
    */
   @SuppressWarnings("unchecked") // cast to Class<T>
-  public static <T> @Nullable Class<T> leastUpperBound(
-      List<? extends @MustCallUnknown @Nullable Object> objects) {
+  public static <T> @Nullable Class<T> leastUpperBound(List<?> objects) {
     Class<T> result = null;
     for (Object obj : objects) {
       if (obj != null) {
