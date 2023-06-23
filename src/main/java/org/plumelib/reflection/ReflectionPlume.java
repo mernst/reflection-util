@@ -25,6 +25,7 @@ import org.checkerframework.checker.signature.qual.BinaryName;
 import org.checkerframework.checker.signature.qual.ClassGetName;
 import org.checkerframework.checker.signature.qual.ClassGetSimpleName;
 import org.checkerframework.checker.signature.qual.FullyQualifiedName;
+import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.dataflow.qual.Pure;
 
 /** Utility functions related to reflection, Class, Method, ClassLoader, and classpath. */
@@ -525,7 +526,8 @@ public final class ReflectionPlume {
    *     null
    */
   @SuppressWarnings("unchecked") // cast to Class<T>
-  public static <T> @Nullable Class<T> leastUpperBound(@PolyNull @PolyMustCall Object[] objects) {
+  public static <T> @Nullable Class<T> leastUpperBound(
+      @PolyNull @PolyMustCall @PolySigned Object[] objects) {
     Class<T> result = null;
     for (Object obj : objects) {
       if (obj != null) {
