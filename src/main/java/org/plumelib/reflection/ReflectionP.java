@@ -1,5 +1,4 @@
-// If you edit this file, you must also edit its tests.
-// For tests of this and the entire plume package, see class TestPlume.
+// If you edit this file, you must also edit its tests in class TestReflectionP.
 
 package org.plumelib.reflection;
 
@@ -11,10 +10,10 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
 import org.checkerframework.checker.interning.qual.Interned;
 import org.checkerframework.checker.mustcall.qual.MustCallUnknown;
 import org.checkerframework.checker.mustcall.qual.PolyMustCall;
@@ -42,7 +41,7 @@ public final class ReflectionP {
 
   /**
    * Returns true iff sub is a subtype of sup. If sub == sup, then sub is considered a subtype of
-   * sub and this method returns true.
+   * sup and this method returns true.
    *
    * @param sub class to test for being a subtype
    * @param sup class to test for being a supertype
@@ -281,7 +280,7 @@ public final class ReflectionP {
    * array of Class objects, one for each arg type. Example keys include: "java.lang.String,
    * java.lang.String, java.lang.Class[]" and "int,int".
    */
-  private static final HashMap<String, Class<?>[]> args_seen = new HashMap<>();
+  private static final ConcurrentHashMap<String, Class<?>[]> argsSeen = new ConcurrentHashMap<>();
 
   /**
    * Given a method signature, return the method.
@@ -323,7 +322,8 @@ public final class ReflectionP {
     for (int i = cparenpos + 1; i < method.length(); i++) {
       if (!Character.isWhitespace(method.charAt(i))) {
         throw new Error(
-            "malformed method name should contain only whitespace following close paren");
+            "malformed method name should contain only whitespace following close paren: "
+                + method);
       }
     }
 
@@ -331,10 +331,10 @@ public final class ReflectionP {
     @BinaryName String classname = method.substring(0, dotpos);
     String methodname = method.substring(dotpos + 1, oparenpos);
     String allArgnames = method.substring(oparenpos + 1, cparenpos).trim();
-    Class<?>[] argclasses = args_seen.get(allArgnames);
+    Class<?>[] argclasses = argsSeen.get(allArgnames);
     if (argclasses == null) {
       @BinaryName String[] argnames;
-      if (allArgnames.equals("")) {
+      if (allArgnames.isEmpty()) {
         argnames = new String[0];
       } else {
         @SuppressWarnings("signature") // string manipulation: splitting a method signature
@@ -351,7 +351,7 @@ public final class ReflectionP {
       // TODO: Shouldn't this require a warning suppression?
       Class<?>[] argclassesRes = (@NonNull Class<?>[]) argclassesTmp;
       argclasses = argclassesRes;
-      args_seen.put(allArgnames, argclassesRes);
+      argsSeen.put(allArgnames, argclassesRes);
     }
     return methodForName(classname, methodname, argclasses);
   }

@@ -2,11 +2,15 @@ package org.plumelib.reflection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 
 /** Test code for the ReflectionP class. */
@@ -75,6 +79,33 @@ public final class TestReflectionP {
     assertTrue(!ReflectionP.isSubtype(Cloneable.class, ArrayList.class));
     assertTrue(ReflectionP.isSubtype(ArrayList.class, List.class));
     assertTrue(!ReflectionP.isSubtype(List.class, ArrayList.class));
+  }
+
+  @Test
+  void test_leastUpperBound() {
+    // The array-of-objects overload.
+    assertNull(ReflectionP.leastUpperBound(new Object[0]));
+    assertNull(ReflectionP.leastUpperBound(new @Nullable Object[] {null, null}));
+    // A null element is ignored.
+    assertEquals(
+        Integer.class,
+        ReflectionP.leastUpperBound(new @Nullable Object[] {null, Integer.valueOf(5)}));
+    assertEquals(
+        Integer.class,
+        ReflectionP.leastUpperBound(new Object[] {Integer.valueOf(1), Integer.valueOf(2)}));
+    // The least upper bound of a class and one of its supertypes is the supertype.
+    assertEquals(
+        Object.class, ReflectionP.leastUpperBound(new Object[] {new Object(), Integer.valueOf(1)}));
+    assertEquals(
+        Object.class, ReflectionP.leastUpperBound(new Object[] {Integer.valueOf(1), new Object()}));
+
+    // The list-of-objects overload.
+    assertNull(ReflectionP.leastUpperBound(Collections.emptyList()));
+    assertEquals(
+        Integer.class,
+        ReflectionP.leastUpperBound(List.of(Integer.valueOf(1), Integer.valueOf(2))));
+    assertEquals(
+        Object.class, ReflectionP.leastUpperBound(Arrays.asList(new Object(), Integer.valueOf(1))));
   }
 
   @Test
